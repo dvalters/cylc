@@ -531,11 +531,11 @@ Main Control GUI that displays one or more views or interfaces to the suite.
                 del self.__class__.VIEWS["graph"]
             if "graph" in self.__class__.VIEWS_ORDERED:
                 self.__class__.VIEWS_ORDERED.remove('graph')
-
         self.cfg = InitData(
             suite, owner, host, port, comms_timeout, template_vars,
-            gcfg.get(["ungrouped views"]),
-            gcfg.get(["sort by definition order"]))
+            # Create list and bool copies
+            list(gcfg.get(["ungrouped views"])),
+            bool(gcfg.get(["sort by definition order"])))
 
         self.theme_name = gcfg.get(['use theme'])
         self.theme = gcfg.get(['themes', self.theme_name])
