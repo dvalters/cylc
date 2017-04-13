@@ -534,8 +534,8 @@ Main Control GUI that displays one or more views or interfaces to the suite.
 
         self.cfg = InitData(
             suite, owner, host, port, comms_timeout, template_vars,
-            gcfg.get(["ungrouped views"]),
-            gcfg.get(["sort by definition order"]))
+            list(gcfg.get(["ungrouped views"])),
+            bool(gcfg.get(["sort by definition order"])))
 
         self.theme_name = gcfg.get(['use theme'])
         self.theme = gcfg.get(['themes', self.theme_name])
