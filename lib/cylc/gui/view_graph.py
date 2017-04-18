@@ -399,13 +399,14 @@ Dependency graph suite control interface.
         return items
 
     def group_all(self, w, group):
+        #import pdb; pdb.set_trace()
         if group:
             self.t.group_all = True
             self.t.ungroup_all = False
             if "graph" in self.cfg.ungrouped_views:
                 self.cfg.ungrouped_views.remove("graph")
         else:
-            self.t.ungroup_all = True
+            self.t.ungroup_all  = True
             self.t.group_all = False
             if "graph" not in self.cfg.ungrouped_views:
                 self.cfg.ungrouped_views.append("graph")

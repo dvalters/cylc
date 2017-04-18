@@ -25,6 +25,7 @@ import gtk
 import pango
 import gobject
 import shlex
+from copy import deepcopy
 from subprocess import Popen, PIPE, STDOUT
 from uuid import uuid4
 from isodatetime.parsers import TimePointParser
@@ -516,6 +517,7 @@ Main Control GUI that displays one or more views or interfaces to the suite.
                        "graph": "/icons/tab-graph.png"}
 
     if not graphing_disabled:
+        #import pdb; pdb.set_trace()
         VIEWS["graph"] = ControlGraph
         VIEWS_ORDERED.append("graph")
 
@@ -531,11 +533,16 @@ Main Control GUI that displays one or more views or interfaces to the suite.
                 del self.__class__.VIEWS["graph"]
             if "graph" in self.__class__.VIEWS_ORDERED:
                 self.__class__.VIEWS_ORDERED.remove('graph')
-
+        #import pdb; pdb.set_trace()
+        
+        # Attempt to separate from gcfg (in gcylc.py)
+        self.client_ungrouped_views = []
+        self.client_sort_by_def_order = False
+        
         self.cfg = InitData(
             suite, owner, host, port, comms_timeout, template_vars,
-            list(gcfg.get(["ungrouped views"])),
-            bool(gcfg.get(["sort by definition order"])))
+            gcfg.get(["ungrouped views"]),
+            gcfg.get(["sort by definition order"]))
 
         self.theme_name = gcfg.get(['use theme'])
         self.theme = gcfg.get(['themes', self.theme_name])
