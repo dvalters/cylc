@@ -48,7 +48,7 @@ SPEC = {
         options=["small", "medium", "large", "extra large"]),
     'initial side-by-side views': vdr(vtype='boolean', default=False),
     'initial views': vdr(vtype='string_list', default=["text"]),
-    'sort by definition order': vdr(vtype='boolean', default=True),
+    #'sort by definition order': vdr(vtype='boolean', default=True),
     'sort column': vdr(
         vtype='string',
         default='none',
@@ -80,7 +80,7 @@ SPEC = {
     },
     'transpose dot': vdr(vtype='boolean', default=False),
     'transpose graph': vdr(vtype='boolean', default=False),
-    'ungrouped views': vdr(vtype='string_list', default=[]),
+    #'ungrouped views': vdr(vtype='string_list', default=[]),
     'use theme': vdr(vtype='string', default="default"),
     'window size': vdr(vtype='integer_list', default=[800, 500]),
 }

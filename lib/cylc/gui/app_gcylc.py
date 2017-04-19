@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from copy import deepcopy
 
 # THIS FILE IS PART OF THE CYLC SUITE ENGINE.
 # Copyright (C) 2008-2017 NIWA
@@ -499,6 +500,9 @@ class ControlApp(object):
     """
 Main Control GUI that displays one or more views or interfaces to the suite.
     """
+    
+    # Put the view conifg client side (i.e. here).
+    
 
     DEFAULT_VIEW = "text"
 
@@ -531,11 +535,18 @@ Main Control GUI that displays one or more views or interfaces to the suite.
                 del self.__class__.VIEWS["graph"]
             if "graph" in self.__class__.VIEWS_ORDERED:
                 self.__class__.VIEWS_ORDERED.remove('graph')
-        self.cfg = InitData(
+                
+        
+        self.client_ungrouped_views = [] 
+        #deepcopy(list(gcfg.get(["ungrouped views"])))
+        self.client_sort_by_def_order = True 
+        #deepcopy(bool(gcfg.get(["sort by definition order"])))
+
+        self.client_cfg = InitData(
             suite, owner, host, port, comms_timeout, template_vars,
             # Create list and bool copies
-            list(gcfg.get(["ungrouped views"])),
-            bool(gcfg.get(["sort by definition order"])))
+            self.client_ungrouped_views,
+            self.client_sort_by_def_order)
 
         self.theme_name = gcfg.get(['use theme'])
         self.theme = gcfg.get(['themes', self.theme_name])
@@ -627,12 +638,12 @@ Main Control GUI that displays one or more views or interfaces to the suite.
             self.reset(suite)
 
     def reset(self, suite, auth=None):
-        self.cfg.reset(suite, auth)
+        self.client_cfg.reset(suite, auth)
 
         win_title = suite
-        if (self.cfg.host is not None and self.cfg.port is not None and
-                is_remote_host(self.cfg.host)):
-            win_title += " - %s:%d" % (self.cfg.host, int(self.cfg.port))
+        if (self.client_cfg.host is not None and self.client_cfg.port is not None and
+                is_remote_host(self.client_cfg.host)):
+            win_title += " - %s:%d" % (self.client_cfg.host, int(self.client_cfg.port))
         self.window.set_title(win_title)
 
         self.tool_bar_box.set_sensitive(True)
@@ -858,7 +869,7 @@ Main Control GUI that displays one or more views or interfaces to the suite.
         """
         container = self.view_containers[view_num]
         self.current_views[view_num] = self.VIEWS[viewname](
-            self.cfg, self.updater, self.theme, self.dot_size, self.info_bar,
+            self.client_cfg, self.updater, self.theme, self.dot_size, self.info_bar,
             self.get_right_click_menu, self.log_colors, self.insert_task_popup)
         view = self.current_views[view_num]
         view.name = viewname
@@ -978,7 +989,7 @@ Main Control GUI that displays one or more views or interfaces to the suite.
         else:
             title = "Open Another Suite"
         app = dbchooser(
-            title, self.window, self.cfg.cylc_tmpdir, self.cfg.comms_timeout)
+            title, self.window, self.client_cfg.cylc_tmpdir, self.client_cfg.comms_timeout)
         reg, auth = None, None
         while True:
             response = app.window.run()
@@ -1023,7 +1034,7 @@ Main Control GUI that displays one or more views or interfaces to the suite.
 
     def stopsuite_default(self, *args):
         """Try to stop the suite (after currently running tasks...)."""
-        if not self.get_confirmation("Stop suite %s?" % self.cfg.suite):
+        if not self.get_confirmation("Stop suite %s?" % self.client_cfg.suite):
             return
         self.put_comms_command('set_stop_cleanly')
 
@@ -1116,8 +1127,8 @@ Main Control GUI that displays one or more views or interfaces to the suite.
         item2 = " -i '[scheduling]final cycle point'"
         command = (
             "cylc get-suite-config --mark-up" + self.get_remote_run_opts() +
-            " " + self.cfg.template_vars_opts + " --one-line" + item1 +
-            item2 + " " + self.cfg.suite)
+            " " + self.client_cfg.template_vars_opts + " --one-line" + item1 +
+            item2 + " " + self.client_cfg.suite)
         res = run_get_stdout(command, filter=True)  # (T/F, ['ct ct'])
 
         if res[0]:
@@ -1153,7 +1164,7 @@ been defined for this suite""").inform()
         Reset connection.
         """
 
-        command = 'cylc run ' + self.cfg.template_vars_opts
+        command = 'cylc run ' + self.client_cfg.template_vars_opts
         options = ''
         method = ''
         if coldstart_rb.get_active():
@@ -1163,7 +1174,7 @@ been defined for this suite""").inform()
             options += ' -w'
         elif restart_rb.get_active():
             method = 'restart'
-            command = 'cylc restart ' + self.cfg.template_vars_opts
+            command = 'cylc restart ' + self.client_cfg.template_vars_opts
 
         if mode_live_rb.get_active():
             pass
@@ -1198,13 +1209,13 @@ been defined for this suite""").inform()
 
         options += self.get_remote_run_opts()
 
-        command += ' ' + options + ' ' + self.cfg.suite + ' ' + point_string
+        command += ' ' + options + ' ' + self.client_cfg.suite + ' ' + point_string
         print command
 
         try:
             Popen([command], shell=True)
         except OSError, e:
-            warning_dialog('Error: failed to start ' + self.cfg.suite,
+            warning_dialog('Error: failed to start ' + self.client_cfg.suite,
                            self.window).warn()
             success = False
 
@@ -1219,7 +1230,7 @@ been defined for this suite""").inform()
         about.set_version(CYLC_VERSION)
         about.set_copyright("Copyright (C) 2008-2017 NIWA")
         about.set_comments(
-            "The Cylc Suite Engine.\n\nclient UUID:\n%s" % self.cfg.my_uuid)
+            "The Cylc Suite Engine.\n\nclient UUID:\n%s" % self.client_cfg.my_uuid)
         about.set_logo(get_logo())
         about.set_transient_for(self.window)
         about.run()
@@ -1227,8 +1238,8 @@ been defined for this suite""").inform()
 
     def view_task_descr(self, w, e, task_id, *args):
         command = ("cylc show" + self.get_remote_run_opts() + " " +
-                   self.cfg.suite + " " + task_id)
-        foo = gcapture_tmpfile(command, self.cfg.cylc_tmpdir, 600, 400)
+                   self.client_cfg.suite + " " + task_id)
+        foo = gcapture_tmpfile(command, self.client_cfg.cylc_tmpdir, 600, 400)
         self.gcapture_windows.append(foo)
         foo.run()
 
@@ -1293,7 +1304,7 @@ been defined for this suite""").inform()
             url_item = gtk.MenuItem('_Browse task URL')
             name, point_string = TaskID.split(task_ids[0])
             url_item.connect('activate', self.browse, "-t", name,
-                             self.cfg.suite)
+                             self.client_cfg.suite)
             menu.append(url_item)
 
             if not task_is_family[0]:
@@ -1536,7 +1547,7 @@ been defined for this suite""").inform()
 
         vbox = gtk.VBox()
 
-        label = gtk.Label('SUITE: ' + self.cfg.suite)
+        label = gtk.Label('SUITE: ' + self.client_cfg.suite)
         vbox.pack_start(label, True)
 
         entry = gtk.Entry()
@@ -1601,7 +1612,7 @@ been defined for this suite""").inform()
         if not results or task_id in bad_items:
             warning_dialog(
                 "Task proxy " + task_id +
-                " not found in " + self.cfg.suite +
+                " not found in " + self.client_cfg.suite +
                 ".\nTasks are removed once they are no longer needed.",
                 self.window).warn()
             return
@@ -1635,7 +1646,7 @@ been defined for this suite""").inform()
         self.update_tb(tb, 'TASK ', [bold])
         self.update_tb(tb, task_id, [bold, blue])
         self.update_tb(tb, ' in SUITE ', [bold])
-        self.update_tb(tb, self.cfg.suite + '\n', [bold, blue])
+        self.update_tb(tb, self.client_cfg.suite + '\n', [bold, blue])
 
         for name, done in [
                 ("prerequisites", "satisfied"), ("outputs", "completed")]:
@@ -1669,7 +1680,7 @@ shown here in the state they were in at the time of triggering.''')
         w.destroy()
 
     def get_confirmation(self, question, force_prompt=False):
-        if self.cfg.no_prompt and not force_prompt:
+        if self.client_cfg.no_prompt and not force_prompt:
             return True
         prompt = gtk.MessageDialog(self.window, gtk.DIALOG_MODAL,
                                    gtk.MESSAGE_QUESTION,
@@ -1711,8 +1722,8 @@ shown here in the state they were in at the time of triggering.''')
         if not self.get_confirmation("Edit run %s?" % task_id):
             return
         command = "cylc trigger --use-ssh --edit --geditor -f%s %s %s" % (
-            self.get_remote_run_opts(), self.cfg.suite, task_id)
-        foo = gcapture_tmpfile(command, self.cfg.cylc_tmpdir, 400, 400)
+            self.get_remote_run_opts(), self.client_cfg.suite, task_id)
+        foo = gcapture_tmpfile(command, self.client_cfg.cylc_tmpdir, 400, 400)
         self.gcapture_windows.append(foo)
         foo.run()
 
@@ -1775,7 +1786,7 @@ shown here in the state they were in at the time of triggering.''')
         window.modify_bg(gtk.STATE_NORMAL,
                          gtk.gdk.color_parse(self.log_colors.get_color()))
         window.set_border_width(5)
-        window.set_title("Stop Suite Daemon %s" % self.cfg.suite)
+        window.set_title("Stop Suite Daemon %s" % self.client_cfg.suite)
         window.set_transient_for(self.window)
         window.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
 
@@ -1784,7 +1795,7 @@ shown here in the state they were in at the time of triggering.''')
         vbox = gtk.VBox()
         stop_rb = gtk.RadioButton(
             None, "Stop after _active tasks have finished")
-        label = gtk.Label("   cylc stop %s" % self.cfg.suite)
+        label = gtk.Label("   cylc stop %s" % self.client_cfg.suite)
         label.modify_font(pango.FontDescription("monospace"))
         label.set_alignment(0, 0)
         vbox.pack_start(stop_rb)
@@ -1793,7 +1804,7 @@ shown here in the state they were in at the time of triggering.''')
 
         vbox = gtk.VBox()
         kill_rb = gtk.RadioButton(stop_rb, "Stop after _killing active tasks")
-        label = gtk.Label("   cylc stop --kill %s" % self.cfg.suite)
+        label = gtk.Label("   cylc stop --kill %s" % self.client_cfg.suite)
         label.modify_font(pango.FontDescription("monospace"))
         label.set_alignment(0, 0)
         vbox.pack_start(kill_rb, True)
@@ -1804,7 +1815,7 @@ shown here in the state they were in at the time of triggering.''')
         stopnow_rb = gtk.RadioButton(
             stop_rb,
             "Stop _now (restart will follow up on orphaned tasks)")
-        label = gtk.Label("   cylc stop --now %s" % self.cfg.suite)
+        label = gtk.Label("   cylc stop --now %s" % self.client_cfg.suite)
         label.modify_font(pango.FontDescription("monospace"))
         label.set_alignment(0, 0)
         vbox.pack_start(stopnow_rb, True)
@@ -1815,7 +1826,7 @@ shown here in the state they were in at the time of triggering.''')
         stopnownow_rb = gtk.RadioButton(
             stop_rb,
             "Terminate _now (restart will follow up on orphaned tasks)")
-        label = gtk.Label("   cylc stop --now --now %s" % self.cfg.suite)
+        label = gtk.Label("   cylc stop --now --now %s" % self.client_cfg.suite)
         label.modify_font(pango.FontDescription("monospace"))
         label.set_alignment(0, 0)
         vbox.pack_start(stopnownow_rb, True)
@@ -1824,7 +1835,7 @@ shown here in the state they were in at the time of triggering.''')
 
         vbox = gtk.VBox()
         stopat_rb = gtk.RadioButton(stop_rb, "Stop after _cycle point")
-        label = gtk.Label("   cylc stop %s CYCLE_POINT" % self.cfg.suite)
+        label = gtk.Label("   cylc stop %s CYCLE_POINT" % self.client_cfg.suite)
         label.modify_font(pango.FontDescription("monospace"))
         label.set_alignment(0, 0)
         vbox.pack_start(stopat_rb, True)
@@ -1844,7 +1855,7 @@ shown here in the state they were in at the time of triggering.''')
         vbox = gtk.VBox()
         stopct_rb = gtk.RadioButton(
             stop_rb, "Stop after _wall-clock date-time (e.g. CCYYMMDDThhmmZ)")
-        label = gtk.Label("   cylc stop %s DATE_TIME" % self.cfg.suite)
+        label = gtk.Label("   cylc stop %s DATE_TIME" % self.client_cfg.suite)
         label.modify_font(pango.FontDescription("monospace"))
         label.set_alignment(0, 0)
         vbox.pack_start(stopct_rb, True)
@@ -1866,7 +1877,7 @@ shown here in the state they were in at the time of triggering.''')
         syntax = (TaskID.SYNTAX).replace('_', '__')
         stoptt_rb = gtk.RadioButton(
             stop_rb, "Stop after _task finishes (%s)" % syntax)
-        label = gtk.Label("   cylc stop %s TASK_ID" % self.cfg.suite)
+        label = gtk.Label("   cylc stop %s TASK_ID" % self.client_cfg.suite)
         label.modify_font(pango.FontDescription("monospace"))
         label.set_alignment(0, 0)
         vbox.pack_start(stoptt_rb, True)
@@ -1962,7 +1973,7 @@ shown here in the state they were in at the time of triggering.''')
         window.modify_bg(gtk.STATE_NORMAL,
                          gtk.gdk.color_parse(self.log_colors.get_color()))
         window.set_border_width(5)
-        window.set_title("Start Suite '" + self.cfg.suite + "'")
+        window.set_title("Start Suite '" + self.client_cfg.suite + "'")
         window.set_transient_for(self.window)
         window.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
 
@@ -2153,7 +2164,7 @@ shown here in the state they were in at the time of triggering.''')
 
         vbox = gtk.VBox()
 
-        label = gtk.Label('SUITE: ' + self.cfg.suite)
+        label = gtk.Label('SUITE: ' + self.client_cfg.suite)
         vbox.pack_start(label, True)
 
         hbox = gtk.HBox()
@@ -2252,7 +2263,7 @@ shown here in the state they were in at the time of triggering.''')
             name, point_str = TaskID.split(task_id)
             itask_log_dir = os.path.join(
                 GLOBAL_CFG.get_derived_host_item(
-                    self.cfg.suite, "suite job log directory",
+                    self.client_cfg.suite, "suite job log directory",
                 ),
                 point_str,
                 name,
@@ -2272,7 +2283,7 @@ shown here in the state they were in at the time of triggering.''')
                 if is_remote_host(job_host) or is_remote_user(job_user):
                     job_log_dir = job_user_at_host + ':' + os.path.join(
                         GLOBAL_CFG.get_derived_host_item(
-                            self.cfg.suite, 'suite job log directory',
+                            self.client_cfg.suite, 'suite job log directory',
                             job_host, job_user,
                         ),
                         point_str, name, submit_num_str,
@@ -2294,10 +2305,10 @@ shown here in the state they were in at the time of triggering.''')
                     break
 
         auth = None
-        if is_remote_host(self.cfg.host):
-            auth = self.cfg.host
-        elif is_remote_user(self.cfg.owner):
-            auth = self.cfg.owner + "@" + self.cfg.host
+        if is_remote_host(self.client_cfg.host):
+            auth = self.client_cfg.host
+        elif is_remote_user(self.client_cfg.owner):
+            auth = self.client_cfg.owner + "@" + self.client_cfg.host
         if auth:
             for i, log in enumerate(filenames):
                 if ":" not in log:
@@ -2689,7 +2700,7 @@ to reduce network traffic.""")
         img = gtk.image_new_from_stock(gtk.STOCK_DND, gtk.ICON_SIZE_MENU)
         url_item.set_image(img)
         tools_menu.append(url_item)
-        url_item.connect('activate', self.browse, self.cfg.suite)
+        url_item.connect('activate', self.browse, self.client_cfg.suite)
 
         tools_menu.append(gtk.SeparatorMenuItem())
 
@@ -2861,13 +2872,13 @@ to reduce network traffic.""")
         else:
             # Parse the suite definition.
             command = ("cylc get-suite-config -i title -i description " +
-                       self.get_remote_run_opts() + " " + self.cfg.suite)
-            foo = gcapture_tmpfile(command, self.cfg.cylc_tmpdir, 800, 400)
+                       self.get_remote_run_opts() + " " + self.client_cfg.suite)
+            foo = gcapture_tmpfile(command, self.client_cfg.cylc_tmpdir, 800, 400)
             self.gcapture_windows.append(foo)
             foo.run()
 
     def search_suite_popup(self, w):
-        reg = self.cfg.suite
+        reg = self.client_cfg.suite
         window = gtk.Window()
         window.set_border_width(5)
         window.set_title("Suite Search")
@@ -2918,7 +2929,7 @@ to reduce network traffic.""")
             "cylc search %s %s %s" % (
                 options, reg, pattern)
         )
-        foo = gcapture_tmpfile(command, self.cfg.cylc_tmpdir, width=600,
+        foo = gcapture_tmpfile(command, self.client_cfg.cylc_tmpdir, width=600,
                                height=500)
         self.gcapture_windows.append(foo)
         foo.run()
@@ -3179,7 +3190,7 @@ This is what my suite does:..."""
         pixlist1 = gtk.ListStore(gtk.gdk.Pixbuf, str, bool, bool)
         view_items = []
         for v in views:
-            pixbuf = gtk.gdk.pixbuf_new_from_file(self.cfg.imagedir +
+            pixbuf = gtk.gdk.pixbuf_new_from_file(self.client_cfg.imagedir +
                                                   self.VIEW_ICON_PATHS[v])
             pixlist0.append((pixbuf, v))
             pixlist1.append((pixbuf, v, True, False))
@@ -3340,7 +3351,7 @@ For more Stop options use the Control menu.""")
 
     def create_info_bar(self):
         self.info_bar = InfoBar(
-            self.cfg.host, self.theme, self.dot_size,
+            self.client_cfg.host, self.theme, self.dot_size,
             self.filter_states_excl,
             self.popup_filter_dialog,
             self._alter_status_toolbar_menu,
@@ -3351,7 +3362,7 @@ For more Stop options use the Control menu.""")
         info_dialog(
             "Client UUID %s\n"
             "(this identifies a client instance to the suite daemon)" % (
-                self.cfg.my_uuid), self.window).inform()
+                self.client_cfg.my_uuid), self.window).inform()
 
     def popup_theme_legend(self, widget=None):
         """Popup a theme legend window."""
@@ -3413,9 +3424,9 @@ For more Stop options use the Control menu.""")
 
     def run_suite_validate(self, w):
         command = ("cylc validate -v " + self.get_remote_run_opts() +
-                   " " + self.cfg.template_vars_opts +
-                   " " + self.cfg.suite)
-        foo = gcapture_tmpfile(command, self.cfg.cylc_tmpdir, 700)
+                   " " + self.client_cfg.template_vars_opts +
+                   " " + self.client_cfg.suite)
+        foo = gcapture_tmpfile(command, self.client_cfg.cylc_tmpdir, 700)
         self.gcapture_windows.append(foo)
         foo.run()
         return False
@@ -3425,10 +3436,10 @@ For more Stop options use the Control menu.""")
         if inlined:
             extra = '-i '
         command = ("cylc edit -g " +
-                   self.cfg.template_vars_opts + " " +
+                   self.client_cfg.template_vars_opts + " " +
                    self.get_remote_run_opts() + " " + extra + ' ' +
-                   self.cfg.suite)
-        foo = gcapture_tmpfile(command, self.cfg.cylc_tmpdir)
+                   self.client_cfg.suite)
+        foo = gcapture_tmpfile(command, self.client_cfg.cylc_tmpdir)
         self.gcapture_windows.append(foo)
         foo.run()
         return False
@@ -3436,39 +3447,39 @@ For more Stop options use the Control menu.""")
     def run_suite_graph(self, w, show_ns=False):
         if show_ns:
             command = "cylc graph -n %s %s %s" % (
-                self.cfg.template_vars_opts,
+                self.client_cfg.template_vars_opts,
                 self.get_remote_run_opts(),
-                self.cfg.suite)
-            foo = gcapture_tmpfile(command, self.cfg.cylc_tmpdir)
+                self.client_cfg.suite)
+            foo = gcapture_tmpfile(command, self.client_cfg.cylc_tmpdir)
             self.gcapture_windows.append(foo)
             foo.run()
         else:
             # TODO - a "load" button as for suite startup cycle points.
             graph_suite_popup(
-                self.cfg.suite, self.command_help, None, None,
+                self.client_cfg.suite, self.command_help, None, None,
                 self.get_remote_run_opts(), self.gcapture_windows,
-                self.cfg.cylc_tmpdir, self.cfg.template_vars_opts,
+                self.client_cfg.cylc_tmpdir, self.client_cfg.template_vars_opts,
                 parent_window=self.window)
 
     def run_suite_info(self, w):
         command = (
             "cylc show " + self.get_remote_run_opts() +
-            " " + self.cfg.suite)
-        foo = gcapture_tmpfile(command, self.cfg.cylc_tmpdir, 600, 400)
+            " " + self.client_cfg.suite)
+        foo = gcapture_tmpfile(command, self.client_cfg.cylc_tmpdir, 600, 400)
         self.gcapture_windows.append(foo)
         foo.run()
 
     def run_suite_list(self, w, opt=''):
         command = (
             "cylc list " + self.get_remote_run_opts() + " " + opt +
-            " " + self.cfg.template_vars_opts + " " +
-            self.cfg.suite)
-        foo = gcapture_tmpfile(command, self.cfg.cylc_tmpdir, 600, 600)
+            " " + self.client_cfg.template_vars_opts + " " +
+            self.client_cfg.suite)
+        foo = gcapture_tmpfile(command, self.client_cfg.cylc_tmpdir, 600, 600)
         self.gcapture_windows.append(foo)
         foo.run()
 
     def run_suite_log(self, w, type='log'):
-        if is_remote_host(self.cfg.host) or is_remote_user(self.cfg.owner):
+        if is_remote_host(self.client_cfg.host) or is_remote_user(self.client_cfg.owner):
             if type == 'out':
                 xopts = ' --stdout '
             elif type == 'err':
@@ -3478,16 +3489,16 @@ For more Stop options use the Control menu.""")
 
             command = ("cylc cat-log " +
                        self.get_remote_run_opts() +
-                       xopts + self.cfg.suite)
-            foo = gcapture_tmpfile(command, self.cfg.cylc_tmpdir, 800, 400,
-                                   title="%s %s" % (self.cfg.suite, type))
+                       xopts + self.client_cfg.suite)
+            foo = gcapture_tmpfile(command, self.client_cfg.cylc_tmpdir, 800, 400,
+                                   title="%s %s" % (self.client_cfg.suite, type))
             self.gcapture_windows.append(foo)
             foo.run()
             return
 
         task_name_list = []  # TODO
         # assumes suite out, err, and log are in the same location:
-        foo = cylc_logviewer(type, self.cfg.logdir, task_name_list)
+        foo = cylc_logviewer(type, self.client_cfg.logdir, task_name_list)
         self.quitters.append(foo)
 
     def run_suite_view(self, w, method):
@@ -3499,29 +3510,29 @@ For more Stop options use the Control menu.""")
 
         command = ("cylc view -g " +
                    self.get_remote_run_opts() + " " + extra + " " +
-                   self.cfg.template_vars_opts + " " + self.cfg.suite)
-        foo = gcapture_tmpfile(command, self.cfg.cylc_tmpdir, 400)
+                   self.client_cfg.template_vars_opts + " " + self.client_cfg.suite)
+        foo = gcapture_tmpfile(command, self.client_cfg.cylc_tmpdir, 400)
         self.gcapture_windows.append(foo)
         foo.run()
         return False
 
     def get_remote_run_opts(self):
         ret = ""
-        if self.cfg.host is not None:
-            ret += " --host=" + self.cfg.host
-        if self.cfg.owner is not None:
-            ret += " --user=" + self.cfg.owner
+        if self.client_cfg.host is not None:
+            ret += " --host=" + self.client_cfg.host
+        if self.client_cfg.owner is not None:
+            ret += " --user=" + self.client_cfg.owner
         return ret
 
     def browse(self, b, *args):
         command = (
             'cylc doc ' + self.get_remote_run_opts() + ' ' + ' '.join(args))
-        foo = gcapture_tmpfile(command, self.cfg.cylc_tmpdir, 700)
+        foo = gcapture_tmpfile(command, self.client_cfg.cylc_tmpdir, 700)
         self.gcapture_windows.append(foo)
         foo.run()
 
     def command_help(self, w, cat='', com=''):
         command = "cylc " + cat + " " + com + " help"
-        foo = gcapture_tmpfile(command, self.cfg.cylc_tmpdir, 700, 600)
+        foo = gcapture_tmpfile(command, self.client_cfg.cylc_tmpdir, 700, 600)
         self.gcapture_windows.append(foo)
         foo.run()

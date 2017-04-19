@@ -133,7 +133,7 @@ class Updater(threading.Thread):
         self.quit = False
 
         self.app_window = app.window
-        self.cfg = app.cfg
+        self.client_cfg = app.client_cfg
         self.info_bar = app.info_bar
 
         self.summary_update_time = None
@@ -174,8 +174,8 @@ class Updater(threading.Thread):
         self.connect_fail_warned = False
         self.version_mismatch_warned = False
 
-        client_args = (self.cfg.suite, self.cfg.owner, self.cfg.host,
-                       self.cfg.port, self.cfg.comms_timeout, self.cfg.my_uuid)
+        client_args = (self.client_cfg.suite, self.client_cfg.owner, self.client_cfg.host,
+                       self.client_cfg.port, self.client_cfg.comms_timeout, self.client_cfg.my_uuid)
         self.state_summary_client = StateSummaryClient(*client_args)
         self.suite_info_client = SuiteInfoClient(*client_args)
         self.suite_log_client = SuiteLogClient(*client_args)
@@ -211,9 +211,9 @@ class Updater(threading.Thread):
                 traceback.print_exc()
             # Use info bar to display stop summary if available.
             # Otherwise, just display the reconnect count down.
-            if self.cfg.suite and self.stop_summary is None:
+            if self.client_cfg.suite and self.stop_summary is None:
                 stop_summary = get_stop_state_summary(
-                    cat_state(self.cfg.suite, self.cfg.host, self.cfg.owner))
+                    cat_state(self.client_cfg.suite, self.client_cfg.host, self.client_cfg.owner))
                 self.last_update_time = time()
                 if stop_summary != self.stop_summary:
                     self.stop_summary = stop_summary
@@ -239,7 +239,7 @@ class Updater(threading.Thread):
 
         gobject.idle_add(
             self.app_window.set_title, "%s - %s:%s" % (
-                self.cfg.suite, self.suite_info_client.host,
+                self.client_cfg.suite, self.suite_info_client.host,
                 self.suite_info_client.port))
         if cylc.flags.debug:
             print >> sys.stderr, "succeeded"
@@ -315,7 +315,7 @@ class Updater(threading.Thread):
 
         self.mode = glbl['run_mode']
 
-        if self.cfg.use_defn_order:
+        if self.client_cfg.use_defn_order:
             nsdo = glbl['namespace definition order']
             if self.ns_defn_order != nsdo:
                 self.ns_defn_order = nsdo
@@ -347,20 +347,20 @@ class Updater(threading.Thread):
         self.full_fam_state_summary = {}
         self.all_families = {}
         self.global_summary = {}
-        self.cfg.port = None
+        self.client_cfg.port = None
         for client in [self.state_summary_client, self.suite_info_client,
                        self.suite_log_client, self.suite_command_client]:
-            if self.cfg.host is None:
+            if self.client_cfg.host is None:
                 client.host = None
             client.port = None
 
-        if self.cfg.host:
+        if self.client_cfg.host:
             gobject.idle_add(
                 self.app_window.set_title, "%s - %s" % (
-                    self.cfg.suite, self.cfg.host))
+                    self.client_cfg.suite, self.client_cfg.host))
         else:
             gobject.idle_add(
-                self.app_window.set_title, str(self.cfg.suite))
+                self.app_window.set_title, str(self.client_cfg.suite))
 
     def set_status(self, status=None):
         """Update status bar."""
