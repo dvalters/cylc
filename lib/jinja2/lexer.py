@@ -15,6 +15,7 @@
     :license: BSD, see LICENSE for more details.
 """
 import re
+import sys
 from collections import deque
 from operator import itemgetter
 
