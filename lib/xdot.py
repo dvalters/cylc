@@ -914,7 +914,7 @@ class Parser:
 
     def __init__(self, lexer):
         self.lexer = lexer
-        self.lookahead = self.lexer.next()
+        self.lookahead = next(self.lexer)
 
     def match(self, type):
         if self.lookahead.type != type:
@@ -930,7 +930,7 @@ class Parser:
 
     def consume(self):
         token = self.lookahead
-        self.lookahead = self.lexer.next()
+        self.lookahead = next(self.lexer)
         return token
 
 

@@ -20,6 +20,7 @@
     platforms, "apache" may be called "apachectl" or "apache2ctl"--create
     a symlink to them if needed.
 """
+from __future__ import print_function
 
 import getopt
 import os

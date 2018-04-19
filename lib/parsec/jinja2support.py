@@ -19,6 +19,7 @@
 
 Importing code should catch ImportError in case Jinja2 is not installed.
 """
+from __future__ import print_function
 
 from glob import glob
 import os
@@ -77,9 +78,9 @@ def jinja2process(flines, dir_, template_vars=None):
     # '#!cylc-x.y.z' rises to the top. Callers should handle jinja2
     # TemplateSyntaxerror and TemplateError.
     if cylc.flags.verbose and template_vars:
-        print 'Setting Jinja2 template variables:'
+        print('Setting Jinja2 template variables:')
         for item in sorted(template_vars.items()):
-            print '    + %s=%s' % item
+            print('    + %s=%s' % item)
 
     # Jinja2 render method requires a dictionary as argument (not None):
     if not template_vars:

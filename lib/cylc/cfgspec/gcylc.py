@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 "gcylc config file format."
+from __future__ import print_function
 
 import os
 import sys
@@ -153,9 +154,9 @@ class gconfig(config):
 
         # and check it is valid
         if self.use_theme not in cfg['themes']:
-            print >> sys.stderr, (
+            print((
                 "WARNING: theme " + self.use_theme + " not found, using '" +
-                self.default_theme + "'")
+                self.default_theme + "'"), file=sys.stderr)
             cfg['use theme'] = 'default'
             self.use_theme = self.default_theme
 
@@ -171,9 +172,9 @@ class gconfig(config):
                 if cfg['themes'][name]['inherit']:
                     parent = cfg['themes'][name]['inherit']
                     if parent not in cfg['themes']:
-                        print >> sys.stderr, (
+                        print((
                             "WARNING: undefined parent '" + parent +
-                            "' (theme '" + label + "')")
+                            "' (theme '" + label + "')"), file=sys.stderr)
                         parent = "default"
                 else:
                     break
@@ -206,9 +207,9 @@ class gconfig(config):
                     continue
                 state = item
                 if state not in TASK_STATUSES_ALL:
-                    print >> sys.stderr, (
+                    print((
                         "WARNING, ignoring illegal task state '" + state +
-                        "' in theme", theme)
+                        "' in theme", theme), file=sys.stderr)
                 # reverse inherit (override)
                 tcfg = deepcopy(defs)
                 self.inherit(tcfg, self.parse_state(theme, item, val))
@@ -224,12 +225,12 @@ class gconfig(config):
         if 'window size' in cfg:
             fail = False
             if len(cfg['window size']) != 2:
-                print >> sys.stderr, ("WARNING: window size requires two "
-                                      "values (x, y). Using default.")
+                print(("WARNING: window size requires two "
+                                      "values (x, y). Using default."), file=sys.stderr)
                 fail = True
             elif cfg['window size'][0] < 0 or cfg['window size'][1] < 0:
-                print >> sys.stderr, ("WARNING: window size values must be "
-                                      "positive. Using default.")
+                print(("WARNING: window size values must be "
+                                      "positive. Using default."), file=sys.stderr)
                 fail = True
             # TODO: check for daft window sizes? (10, 5), (80000, 5000) ?
             if fail:
@@ -241,14 +242,14 @@ class gconfig(config):
         views = copy(cfg['initial views'])
         for view in views:
             if view not in ['dot', 'text', 'graph']:
-                print >> sys.stderr, (
-                    "WARNING: ignoring illegal view name '" + view + "'")
+                print((
+                    "WARNING: ignoring illegal view name '" + view + "'"), file=sys.stderr)
                 cfg['initial views'].remove(view)
         views = cfg['initial views']
         if len(views) == 0:
             # at least one view required
-            print >> sys.stderr, (
-                "WARNING: no initial views defined, defaulting to 'text'")
+            print((
+                "WARNING: no initial views defined, defaulting to 'text'"), file=sys.stderr)
             cfg['initial views'] = ['text']
 
     @staticmethod
@@ -264,7 +265,7 @@ class gconfig(config):
                 try:
                     gtk.gdk.color_parse(val)
                 except ValueError as exc:
-                    print >> sys.stderr, 'ERROR', exc
+                    print('ERROR', exc, file=sys.stderr)
                     sys.exit('ERROR, gcylc.rc, illegal color: ' + theme +
                              ': ' + name + '="' + item + '"')
             cfg[key] = val
@@ -306,7 +307,7 @@ class gconfig(config):
                 parents.append(key)
 
         if pnative:
-            print cfg
+            print(cfg)
         else:
             printcfg(cfg, prefix=prefix, level=len(keys))
 

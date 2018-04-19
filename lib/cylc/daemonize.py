@@ -112,7 +112,7 @@ def daemonize(server):
             })
             # exit parent 1
             sys.exit(0)
-    except OSError, exc:
+    except OSError as exc:
         sys.stderr.write(
             "fork #1 failed: %d (%s)\n" % (exc.errno, exc.strerror))
         sys.exit(1)
@@ -128,13 +128,13 @@ def daemonize(server):
         if pid > 0:
             # exit parent 2
             sys.exit(0)
-    except OSError, exc:
+    except OSError as exc:
         sys.stderr.write(
             "fork #2 failed: %d (%s)\n" % (exc.errno, exc.strerror))
         sys.exit(1)
 
     # reset umask, octal
-    os.umask(022)
+    os.umask(0o22)
 
     # Redirect /dev/null to stdin.
     # Note that simply reassigning the sys streams is not sufficient

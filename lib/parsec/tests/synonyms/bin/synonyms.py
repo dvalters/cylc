@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import os
 import sys
 
@@ -49,7 +50,7 @@ for expected in res[rcname].keys():
             expected = []
 
     if vals.count(expected) != len(vals):
-        print >> sys.stderr, vals, ' is not all ', expected
+        print(vals, ' is not all ', expected, file=sys.stderr)
         sys.exit("FAIL")
     else:
-        print "OK"
+        print("OK")

@@ -1,3 +1,4 @@
+from __future__ import print_function
 # THIS FILE IS PART OF THE CYLC SUITE ENGINE.
 # Copyright (C) 2008-2018 NIWA
 # 
@@ -24,7 +25,7 @@ import sys
 def main(argv):
 
     if len(argv) != 2:
-        print >> sys.stderr, "Incorrect number of args"
+        print("Incorrect number of args", file=sys.stderr)
         sys.exit(1)
 
     sname = argv[0]
@@ -35,7 +36,7 @@ def main(argv):
     state, err = p.communicate()
 
     if p.returncode > 0:
-        print >> sys.stderr, err
+        print(err, file=sys.stderr)
         sys.exit(1)
 
     db = (os.sep).join([rundir, sname, "log", "db"])
@@ -73,9 +74,9 @@ def main(argv):
     cnx.close()
 
     if error_states:
-        print >> sys.stderr, "The following task states were not consistent with the database:"
+        print("The following task states were not consistent with the database:", file=sys.stderr)
         for line in error_states:
-            print >> sys.stderr, line
+            print(line, file=sys.stderr)
         sys.exit(1)
     else:
         sys.exit(0)

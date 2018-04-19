@@ -47,7 +47,7 @@ class TutorialTest(helper.CPWebCase):
         conf = getattr(module, 'tutconf')
         class_types = type,
         if six.PY2:
-            class_types += types.ClassType,
+            class_types += type,
         if isinstance(root, class_types):
             root = root()
         cherrypy.tree.mount(root, config=conf)

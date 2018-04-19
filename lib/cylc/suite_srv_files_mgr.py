@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Suite service files management."""
+from __future__ import print_function
 
 # Note: Some modules are NOT imported in the header. Expensive modules are only
 # imported on demand.
@@ -367,7 +368,7 @@ To start a new run, stop the old one first with one or more of these:
                     self.get_suite_source_dir(reg),
                     self.get_suite_title(reg)])
             except (IOError, SuiteServiceFileError) as exc:
-                print >> sys.stderr, str(exc)
+                print(str(exc), file=sys.stderr)
         return results
 
     def load_contact_file(self, reg, owner=None, host=None, file_base=None):
@@ -547,7 +548,7 @@ To start a new run, stop the old one first with one or more of these:
         fname = os.path.join(path, item)
         os.rename(handle.name, fname)
         if cylc.flags.verbose:
-            print 'Generated %s' % fname
+            print('Generated %s' % fname)
 
     def _get_cache_dir(self, reg, owner, host):
         """Return the cache directory for remote suite service files."""
@@ -680,7 +681,7 @@ To start a new run, stop the old one first with one or more of these:
                 can_read = True
         if not content or ret_code:
             if cylc.flags.debug:
-                print >> sys.stderr, (
+                print((
                     'ERROR: %(command)s # code=%(ret_code)s\n%(err)s\n'
                 ) % {
                     'command': command,
@@ -688,7 +689,7 @@ To start a new run, stop the old one first with one or more of these:
                     # 'out': out,
                     'err': err,
                     'ret_code': ret_code,
-                }
+                }, file=sys.stderr)
             return
         return content
 

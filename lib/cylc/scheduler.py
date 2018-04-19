@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Cylc scheduler server."""
+from __future__ import print_function
 
 from collections import deque
 from logging import DEBUG
@@ -292,7 +293,7 @@ conditions; see `cylc conditions`.
         license_lines = cylc_license.splitlines()
         lmax = max(len(line) for line in license_lines)
         for i, logo_line in enumerate(logo_lines):
-            print logo_line, ('{0: ^%s}' % lmax).format(license_lines[i])
+            print(logo_line, ('{0: ^%s}' % lmax).format(license_lines[i]))
 
     def configure(self):
         """Configure suite server program."""
@@ -1575,7 +1576,7 @@ conditions; see `cylc conditions`.
         try:
             self.suite_db_mgr.process_queued_ops()
             self.suite_db_mgr.on_suite_shutdown()
-        except StandardError as exc:
+        except Exception as exc:
             ERR.error(str(exc))
 
         # The getattr() calls and if tests below are used in case the

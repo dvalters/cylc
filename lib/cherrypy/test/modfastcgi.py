@@ -32,6 +32,7 @@ KNOWN BUGS
     no response entity body. This isn't really a bug; it just differs from
     the CherryPy default.
 """
+from __future__ import print_function
 
 import os
 curdir = os.path.join(os.getcwd(), os.path.dirname(__file__))

@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Module for performing analysis on profiling results and generating plots."""
+from __future__ import print_function
 
 import os
 import re
@@ -124,7 +125,7 @@ def process_time_file(file_name):
             try:
                 field, value = line.strip().rsplit(': ', 1)
             except ValueError:
-                print 'ERROR: Could not parse line "%s"' % line.strip()
+                print('ERROR: Could not parse line "%s"' % line.strip())
                 continue
             try:  # Try to cast as integer.
                 ret[field] = int(value)
@@ -146,7 +147,7 @@ def process_time_file(file_name):
                         ret[field] = seconds
                     else:  # Cannot parse.
                         if 'Command being timed' not in line:
-                            print 'ERROR: Could not parse value "%s"' % line
+                            print('ERROR: Could not parse value "%s"' % line)
                             ret[field] = value
         if sys.platform == 'darwin':  # MacOS
             ret['total cpu time'] = (ret['user'] + ret['sys'])

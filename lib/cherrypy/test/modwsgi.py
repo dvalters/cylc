@@ -31,6 +31,7 @@ KNOWN BUGS
     traceback as the response content (it's sent to the Apache log instead).
 10. Startup and shutdown of Apache when running mod_wsgi seems slow.
 """
+from __future__ import print_function
 
 import os
 curdir = os.path.abspath(os.path.dirname(__file__))

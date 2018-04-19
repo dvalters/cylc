@@ -240,7 +240,7 @@ class MyDotWindow2(CylcDotViewerCommon):
             if self.outfile:
                 try:
                     self.graph.draw(self.outfile, prog='dot')
-                except IOError, x:
+                except IOError as x:
                     msg = gtk.MessageDialog(type=gtk.MESSAGE_ERROR,
                                             buttons=gtk.BUTTONS_OK,
                                             message_format=str(x))
@@ -475,7 +475,7 @@ class MyDotWindow(CylcDotViewerCommon):
             if self.outfile:
                 try:
                     self.graph.draw(self.outfile, prog='dot')
-                except IOError, x:
+                except IOError as x:
                     msg = gtk.MessageDialog(type=gtk.MESSAGE_ERROR,
                                             buttons=gtk.BUTTONS_OK,
                                             message_format=str(x))

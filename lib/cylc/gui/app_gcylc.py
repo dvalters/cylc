@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """The main control GUI of gcylc."""
+from __future__ import print_function
 
 import os
 import re
@@ -550,9 +551,9 @@ Main Control GUI that displays one or more views or interfaces to the suite.
             self.filter_highlight_color = gtk.gdk.color_parse(hcolor)
         except Exception:
             try:
-                print >> sys.stderr, ("WARNING: bad gcylc.rc 'task filter "
+                print(("WARNING: bad gcylc.rc 'task filter "
                                       "highlight color' (defaulting to yellow)"
-                                      )
+                                      ), file=sys.stderr)
             except IOError:
                 pass  # Cannot print to terminal (session may be closed).
             self.filter_highlight_color = gtk.gdk.color_parse("yellow")
@@ -600,9 +601,9 @@ Main Control GUI that displays one or more views or interfaces to the suite.
         for filter_state in filter_excl:
             if filter_state not in TASK_STATUSES_ALL:
                 try:
-                    print >> sys.stderr, (
+                    print((
                         "WARNING: bad gcylc.rc 'task states to filter out' "
-                        "value (ignoring): %s" % filter_state)
+                        "value (ignoring): %s" % filter_state), file=sys.stderr)
                 except IOError:
                     pass  # Cannot print to terminal (session may be closed).
                 filter_excl.remove(filter_state)
@@ -1198,7 +1199,7 @@ been defined for this suite""").inform()
         options += self.get_remote_run_opts()
         command += ' ' + options + ' ' + self.cfg.suite + ' ' + point_string
         try:
-            print command
+            print(command)
         except IOError:
             pass  # Cannot print to terminal (session may be closed).
 
@@ -3255,7 +3256,7 @@ For more Stop options use the Control menu.""")
         try:
             success, msg = self.updater.client.put_command(
                 command, **kwargs)
-        except Exception, x:
+        except Exception as x:
             warning_dialog(x.__str__(), self.window).warn()
         else:
             if not success:

@@ -30,7 +30,7 @@ def expose(func=None, alias=None):
     decoratable_types = types.FunctionType, types.MethodType, type,
     if not IS_PY3:
         # Old-style classes are type types.ClassType.
-        decoratable_types += types.ClassType,
+        decoratable_types += type,
     if isinstance(func, decoratable_types):
         if alias is None:
             # @expose

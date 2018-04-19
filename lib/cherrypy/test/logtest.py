@@ -1,4 +1,5 @@
 """logtest, a unittest.TestCase helper for testing log output."""
+from __future__ import print_function
 
 import sys
 import time

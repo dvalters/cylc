@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Provides python wrappers to certain git commands."""
+from __future__ import print_function
 
 import os
 from subprocess import Popen, PIPE, CalledProcessError, check_call
@@ -52,14 +53,14 @@ def checkout(branch, delete_pyc=False):
     """Checkouts the git branch with the provided name."""
     try:
         cmd = ['git', 'checkout', '-q', branch]
-        print '$ ' + ' '.join(cmd)
+        print('$ ' + ' '.join(cmd))
         check_call(cmd, stdin=open(os.devnull))
     except CalledProcessError:
         raise GitCheckoutError()
     try:
         if delete_pyc:
             cmd = ['find', 'lib', '-name', r'\*.pyc', '-delete']
-            print '$ ' + ' '.join(cmd)
+            print('$ ' + ' '.join(cmd))
             check_call(
                 cmd, stdin=open(os.devnull), stdout=open(os.devnull, 'wb'))
     except CalledProcessError:

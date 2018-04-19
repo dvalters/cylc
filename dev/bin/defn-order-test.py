@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import time, string, random
 from copy import deepcopy
 
@@ -42,7 +43,7 @@ s = time.time()
 paths2.sort( key=lambda x: map( dict_names.get, x ) )
 t2 = time.time() - s
 
-print "Alphanumeric sort:", t1, "sec"
-print "Definition sort:", t2, "sec"
-print " => factor of", t2/t1
+print("Alphanumeric sort:", t1, "sec")
+print("Definition sort:", t2, "sec")
+print(" => factor of", t2/t1)
 

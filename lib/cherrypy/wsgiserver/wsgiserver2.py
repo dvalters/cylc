@@ -79,6 +79,7 @@ __all__ = ['HTTPRequest', 'HTTPConnection', 'HTTPServer',
            'socket_errors_to_ignore']
 
 import os
+from functools import reduce
 try:
     import queue
 except:
@@ -338,7 +339,7 @@ class SizeCheckWrapper(object):
         return data
 
     def next(self):
-        data = self.rfile.next()
+        data = next(self.rfile)
         self.bytes_read += len(data)
         self._check_length()
         return data
@@ -1016,7 +1017,7 @@ class CP_fileobject(socket._fileobject):
             try:
                 bytes_sent = self.send(data)
                 data = data[bytes_sent:]
-            except socket.error, e:
+            except socket.error as e:
                 if e.args[0] not in socket_errors_nonblocking:
                     raise
 
@@ -1037,7 +1038,7 @@ class CP_fileobject(socket._fileobject):
                 data = self._sock.recv(size)
                 self.bytes_read += len(data)
                 return data
-            except socket.error, e:
+            except socket.error as e:
                 if (e.args[0] not in socket_errors_nonblocking
                         and e.args[0] not in socket_error_eintr):
                     raise
@@ -1932,7 +1933,7 @@ class HTTPServer(object):
             af, socktype, proto, canonname, sa = res
             try:
                 self.bind(af, socktype, proto)
-            except socket.error, serr:
+            except socket.error as serr:
                 msg = "%s -- (%s: %s)" % (msg, sa, serr)
                 if self.socket:
                     self.socket.close()

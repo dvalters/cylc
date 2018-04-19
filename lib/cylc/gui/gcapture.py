@@ -191,7 +191,7 @@ class Gcapture(object):
 
         try:
             f = open(fname, 'wb')
-        except IOError, x:
+        except IOError as x:
             warning_dialog(str(x), self.window).warn()
         else:
             f.write(txt)

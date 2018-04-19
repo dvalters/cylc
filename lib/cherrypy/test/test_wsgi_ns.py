@@ -17,7 +17,7 @@ class WSGI_Namespace_Test(helper.CPWebCase):
                 return self
 
             def next(self):
-                return self.iter.next()
+                return next(self.iter)
 
             def __next__(self):
                 return next(self.iter)
@@ -38,7 +38,7 @@ class WSGI_Namespace_Test(helper.CPWebCase):
                 class CaseResults(WSGIResponse):
 
                     def next(this):
-                        return getattr(this.iter.next(), self.to)()
+                        return getattr(next(this.iter), self.to)()
 
                     def __next__(this):
                         return getattr(next(this.iter), self.to)()
@@ -56,7 +56,7 @@ class WSGI_Namespace_Test(helper.CPWebCase):
                 class ReplaceResults(WSGIResponse):
 
                     def next(this):
-                        line = this.iter.next()
+                        line = next(this.iter)
                         for k, v in self.map.iteritems():
                             line = line.replace(k, v)
                         return line

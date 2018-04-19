@@ -17,13 +17,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """Ordered Dictionary data structure used extensively in cylc."""
+from __future__ import absolute_import
 
 try:
     # Python 2.7+ native.
     from collections import OrderedDict
 except ImportError:
     # Pre-2.7 backport from ActiveState, packaged with Parsec.
-    from OrderedDictCompat import OrderedDict
+    from .OrderedDictCompat import OrderedDict
 
 
 class OrderedDictWithDefaults(OrderedDict):

@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
 import datetime
 import os
 import re
@@ -150,11 +151,11 @@ def inline(lines, dir_, filename, for_grep=False, for_edit=False, viewcfg=None,
 
 
 def cleanup(suitedir):
-    print 'CLEANUP REQUESTED, deleting:'
+    print('CLEANUP REQUESTED, deleting:')
     for root, _, files in os.walk(suitedir):
         for filename in files:
             if '.EDIT.' in filename:
-                print ' + %s' % filename.replace(suitedir + '/', '')
+                print(' + %s' % filename.replace(suitedir + '/', ''))
                 os.unlink(os.path.join(root, filename))
 
 
@@ -219,13 +220,13 @@ def split_file(dir_, lines, filename, recovery=False, level=None):
     if match_on:
         for line in inclines:
             fnew.write(line)
-        print >> sys.stderr
-        print >> sys.stderr, (
+        print(file=sys.stderr)
+        print((
             "ERROR: end-of-file reached while matching include-file",
-            inc_filename + ".")
-        print >> sys.stderr, (
+            inc_filename + "."), file=sys.stderr)
+        print((
             """This probably means you have corrupted the inlined file by
 modifying one of the include-file boundary markers. Fix the backed-
 up inlined file, copy it to the original filename and invoke another
-inlined edit session split the file up again.""")
-        print >> sys.stderr
+inlined edit session split the file up again."""), file=sys.stderr)
+        print(file=sys.stderr)

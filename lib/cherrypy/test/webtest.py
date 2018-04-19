@@ -15,6 +15,7 @@ the traceback to stdout, and keep any assertions you have from running
 (the assumption is that, if the server errors, the page output will not
 be of further significance to your tests).
 """
+from __future__ import print_function
 
 import pprint
 import re
@@ -128,14 +129,14 @@ class ReloadingTestLoader(TestLoader):
         if isinstance(obj, types.ModuleType):
             return self.loadTestsFromModule(obj)
         elif (((six.PY3 and isinstance(obj, type))
-               or isinstance(obj, (type, types.ClassType)))
+               or isinstance(obj, type))
               and issubclass(obj, TestCase)):
             return self.loadTestsFromTestCase(obj)
         elif isinstance(obj, types.UnboundMethodType):
             if six.PY3:
                 return obj.__self__.__class__(obj.__name__)
             else:
-                return obj.im_class(obj.__name__)
+                return obj.__self__.__class__(obj.__name__)
         elif hasattr(obj, '__call__'):
             test = obj()
             if not isinstance(test, TestCase) and \

@@ -87,6 +87,7 @@ def print_mro(C):
 
 print_mro(ex_9.Z)
 """
+from __future__ import print_function
 
 
 from copy import copy
@@ -142,7 +143,7 @@ if __name__ == "__main__":
     parents['b'] = ['root']
     parents['foo'] = ['a', 'b']
 
-    print 'foo', C3(parents).mro('foo')
+    print('foo', C3(parents).mro('foo'))
 
     parents = {}
     parents['o'] = []
@@ -156,7 +157,7 @@ if __name__ == "__main__":
     parents['k3'] = ['d', 'a']
     parents['z'] = ['k1', 'k2', 'k3']
 
-    print 'z', C3(parents).mro('z')
+    print('z', C3(parents).mro('z'))
 
     # Note we can get Python's result by defining an equivalent class
     # hierarchy (with empty class bodies) and printing foo.__mro__.

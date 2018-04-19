@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 "Cylc site and user configuration file spec."
+from __future__ import print_function
 
 import os
 import sys
@@ -415,7 +416,7 @@ class GlobalConfig(config):
         self.sparse.clear()
         self.dense.clear()
         if cylc.flags.verbose:
-            print "Loading site/user config files"
+            print("Loading site/user config files")
         conf_path_str = os.getenv("CYLC_CONF_PATH")
         if conf_path_str is None:
             # CYLC_CONF_PATH not defined, use default locations
@@ -559,7 +560,7 @@ class GlobalConfig(config):
         try:
             mkdir_p(dir_)
         except OSError as exc:
-            print >> sys.stderr, str(exc)
+            print(str(exc), file=sys.stderr)
             raise GlobalConfigError(
                 'Failed to create directory "' + name + '"')
 
@@ -567,13 +568,13 @@ class GlobalConfig(config):
         """Create all top-level cylc-run output dirs on the suite host."""
 
         if cylc.flags.verbose:
-            print 'Creating the suite output tree:'
+            print('Creating the suite output tree:')
 
         cfg = self.get()
 
         item = 'suite run directory'
         if cylc.flags.verbose:
-            print ' +', item
+            print(' +', item)
         idir = self.get_derived_host_item(suite, item)
         if cfg['enable run directory housekeeping']:
             self.roll_directory(
@@ -586,7 +587,7 @@ class GlobalConfig(config):
                 'suite work directory',
                 'suite share directory']:
             if cylc.flags.verbose:
-                print ' +', item
+                print(' +', item)
             idir = self.get_derived_host_item(suite, item)
             self.create_directory(idir, item)
 

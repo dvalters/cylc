@@ -23,6 +23,7 @@ import threading
 from time import sleep
 
 import warnings
+from functools import reduce
 warnings.filterwarnings('ignore', '^.*was not found when attempting to ' +
                         'remove it', Warning)
 
@@ -324,7 +325,7 @@ class DotUpdater(threading.Thread):
                     model.get_value(model.get_iter(path), 0))
 
     @staticmethod
-    def _reselect_row(model, _, iter_, (selection, selected_rows,)):
+    def _reselect_row(model, _, iter_, xxx_todo_changeme):
         """Select rows if they are referenced by selected_rows.
 
         If the value of the first column of a row matches a value in
@@ -333,6 +334,7 @@ class DotUpdater(threading.Thread):
         Warning: This method has not been tested with multiple selection.
 
         """
+        (selection, selected_rows,) = xxx_todo_changeme
         if model.get_value(iter_, 0) in selected_rows:
             selection.select_iter(iter_)
 

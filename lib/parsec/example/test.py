@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+from __future__ import print_function
 import os, sys
 # parse:
 sys.path.append( os.path.join( os.path.dirname(os.path.abspath(__file__)), '..' ))
@@ -32,7 +33,7 @@ class testcfg( config ):
     def check( self, sparse ):
         # TEMPORARY EXAMPLE
         if 'missing item' not in self.sparse.keys():
-            print "missing item is MISSING!!!!"
+            print("missing item is MISSING!!!!")
 
 cfg = testcfg( SPEC )
 strict = False
