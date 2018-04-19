@@ -26,6 +26,8 @@
 
 ---
 language: python
+python:
+ - "3.5"
 
 # General environment setup before we start installing stuff
 before_install:
